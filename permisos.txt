@@ -1,0 +1,23 @@
+📊 Funcionalidades por Rol
+👑 Administrador
+
+Gestión completa de canchas y tipos
+CRUD de clientes y reservas
+Configuración de horarios y precios
+Acceso a todos los reportes
+Acceso exclusivo a auditoría
+
+👨‍💼 Operador
+
+Gestión operativa de canchas
+CRUD de clientes
+Creación y seguimiento de reservas
+Registro de pagos
+Reportes operativos
+
+👁️ Consultor
+
+Solo acceso a reportes
+Consulta de estadísticas
+Visualización de datos históricos
+Sin permisos de modificación

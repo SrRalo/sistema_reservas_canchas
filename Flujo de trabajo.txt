@@ -1,0 +1,42 @@
+Flujo de Trabajo por Rol
+👑 Admin (admin_reservas)
+
+Acceso completo a todos los módulos
+Gestión de canchas, tipos, horarios
+Supervisión de reservas y pagos
+Reportes ejecutivos
+Único acceso a Auditoría
+
+👨‍💼 Operador (operador_reservas)
+
+Gestión operativa de canchas
+CRUD completo de clientes
+Creación y seguimiento de reservas
+Registro de pagos
+Reportes operativos
+
+👁️ Consultor (consultor_reservas)
+
+Solo acceso a Reportes
+Visualización de estadísticas
+Consulta de reservas históricas
+Sin permisos de modificación
+
+Integración con Base de Datos
+Triggers Automáticos
+
+Auditoría automática en clientes y reservas
+Actualización timestamps en todas las tablas
+Validaciones de integridad referencial
+
+Funciones a Utilizar
+
+crear_reserva() - Validaciones completas
+registrar_auditoria() - Log manual de acciones
+Vistas pre-definidas para reportes complejos
+
+Datos de Sesión para Auditoría
+
+Capturar en login: IP, navegador, máquina
+Registrar en auditoria_bitacora cada acción CRUD
+Logout automático con hora_salida

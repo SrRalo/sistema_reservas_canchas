@@ -1,0 +1,12 @@
+[theme]
+primaryColor="#2E86C1"
+base="dark"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+enableStaticServing = true
+
+[client]
+toolbarMode = "minimal"
