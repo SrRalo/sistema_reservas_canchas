@@ -1,3 +1,4 @@
+from turtle import st
 from supabase import create_client
 from datetime import datetime, date, time
 from typing import Optional, Dict, Any
@@ -6,6 +7,10 @@ import os
 # Initialize Supabase client - You'll need to set these environment variables
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("Missing Supabase credentials. Please set SUPABASE_URL and SUPABASE_KEY environment variables.")
