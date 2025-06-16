@@ -1,4 +1,4 @@
-from turtle import st
+import streamlit as st
 from supabase import create_client
 from datetime import datetime, date, time
 from typing import Optional, Dict, Any
