@@ -236,9 +236,30 @@ with tab_lista:
         df['precio_hora'] = df['tipos_cancha'].apply(lambda x: x['precio_por_hora'])
         df['estado'] = df['disponible'].apply(lambda x: "🟢 Disponible" if x else "🔴 No Disponible")
         
-        # Mostrar tabla con acciones
-        for idx, cancha in df.iterrows():
-            with st.expander(f"{cancha['nombre']} - {cancha['tipo']} - {cancha['estado']}"):
+        # Configuración de paginación
+        ITEMS_POR_PAGINA = 5
+        total_canchas = len(df)
+        total_paginas = (total_canchas + ITEMS_POR_PAGINA - 1) // ITEMS_POR_PAGINA
+        
+        col1, col2, col3 = st.columns([2, 3, 2])
+        with col2:
+            pagina_actual = st.number_input(
+                "Página",
+                min_value=1,
+                max_value=max(1, total_paginas),
+                value=1,
+                key="pagina_canchas"
+            )
+        
+        inicio = (pagina_actual - 1) * ITEMS_POR_PAGINA
+        fin = min(inicio + ITEMS_POR_PAGINA, total_canchas)
+        
+        # Información de paginación
+        st.markdown(f"Mostrando canchas {inicio + 1}-{fin} de {total_canchas}")
+        
+        # Mostrar canchas de la página actual
+        for idx, cancha in df.iloc[inicio:fin].iterrows():
+            with st.expander(f"🏟️ {cancha['nombre']} - {cancha['tipo']} - {cancha['estado']}"):
                 col1, col2, col3 = st.columns([3,2,1])
                 
                 with col1:

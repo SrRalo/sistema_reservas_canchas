@@ -45,8 +45,96 @@ def mostrar_dashboard():
     
     # Contenido del dashboard
     st.markdown("---")
-    st.header("Panel de Control �")
-    st.info("El sistema está en construcción. Pronto tendrás acceso a todas las funcionalidades según tu rol.")
+    st.header("🎯 Sistema de Gestión de Canchas Deportivas")
+    
+    # Descripción general
+    st.markdown("""
+    Este sistema integral permite gestionar reservas de canchas deportivas de manera eficiente y organizada.
+    Diseñado para administradores y operadores, ofrece un control completo sobre canchas, clientes y reservas.
+    """)
+    
+    # Módulos del sistema
+    st.subheader("📚 Módulos del Sistema")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Módulos operativos
+        st.markdown("### 🎮 Módulos Operativos")
+        
+        st.markdown("""
+        #### 🏟️ Gestión de Canchas
+        - Administración completa de canchas deportivas
+        - Control de tipos de canchas y precios
+        - Gestión de horarios disponibles
+        - Búsqueda y filtrado de canchas
+        
+        #### 👥 Gestión de Clientes
+        - Registro y mantenimiento de clientes
+        - Control de estado (activo/inactivo)
+        - Historial de reservas por cliente
+        - Búsqueda avanzada de clientes
+        
+        #### 📅 Gestión de Reservas
+        - Creación y seguimiento de reservas
+        - Verificación de disponibilidad
+        - Control de estados de reservas
+        - Confirmación y cancelación
+        """)
+    
+    with col2:
+        # Módulos de control
+        st.markdown("### 📊 Módulos de Control")
+        
+        st.markdown("""
+        #### 📈 Reportes Business
+        - Análisis de ocupación de canchas
+        - Estadísticas de ingresos
+        - Tendencias de reservas
+        - Fidelización de clientes
+        
+        #### 📝 Auditoría
+        - Registro detallado de acciones
+        - Control de cambios en el sistema
+        - Seguimiento de usuarios
+        - Historial de modificaciones
+        """)
+    
+    # Roles y permisos
+    st.subheader("👥 Roles del Sistema")
+    st.markdown("""
+    - **Administrador**: Acceso completo a todas las funcionalidades
+    - **Operador**: Gestión de canchas, clientes y reservas
+    - **Consultor**: Visualización de reportes y consultas
+    """)
+    
+    # Características destacadas
+    st.subheader("⭐ Características Destacadas")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown("""
+        - ✅ Interfaz intuitiva
+        - ✅ Búsqueda avanzada
+        - ✅ Filtros dinámicos
+        """)
+    
+    with col2:
+        st.markdown("""
+        - ✅ Validaciones robustas
+        - ✅ Control de horarios
+        - ✅ Gestión de pagos
+        """)
+    
+    with col3:
+        st.markdown("""
+        - ✅ Reportes detallados
+        - ✅ Auditoría completa
+        - ✅ Seguridad integrada
+        """)
+    
+    # Nota de ayuda
+    st.info("👈 Utiliza el menú lateral para acceder a los diferentes módulos según tu rol.")
 
 def main():
     """Función principal que controla el flujo de la aplicación."""

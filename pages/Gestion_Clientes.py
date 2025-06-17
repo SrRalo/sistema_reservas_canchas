@@ -172,7 +172,29 @@ with tab1:
     # Obtener y mostrar clientes
     clientes = obtener_clientes(busqueda, mostrar_inactivos)
     if clientes:
-        for cliente in clientes:
+        # Configuración de paginación
+        ITEMS_POR_PAGINA = 5
+        total_clientes = len(clientes)
+        total_paginas = (total_clientes + ITEMS_POR_PAGINA - 1) // ITEMS_POR_PAGINA
+        
+        col1, col2, col3 = st.columns([2, 3, 2])
+        with col2:
+            pagina_actual = st.number_input(
+                "Página",
+                min_value=1,
+                max_value=max(1, total_paginas),
+                value=1,
+                key="pagina_clientes"
+            )
+        
+        inicio = (pagina_actual - 1) * ITEMS_POR_PAGINA
+        fin = min(inicio + ITEMS_POR_PAGINA, total_clientes)
+        
+        # Información de paginación
+        st.markdown(f"Mostrando clientes {inicio + 1}-{fin} de {total_clientes}")
+        
+        # Mostrar clientes de la página actual
+        for cliente in clientes[inicio:fin]:
             with st.expander(
                 f"{'🟢' if cliente['activo'] else '🔴'} {cliente['nombre']} {cliente['apellido']} - {cliente['documento']}"
             ):

@@ -231,9 +231,31 @@ with tab_lista:
     reservas = obtener_reservas_filtradas(busqueda, fecha_inicio, fecha_fin, estado)
     
     if not reservas:
-        st.info("No se encontraron reservas con los filtros seleccionados")
+        st.info("No se encontraron reservas que coincidan con los filtros seleccionados.")
     else:
-        for reserva in reservas:
+        # Configuración de paginación
+        ITEMS_POR_PAGINA = 8
+        total_reservas = len(reservas)
+        total_paginas = (total_reservas + ITEMS_POR_PAGINA - 1) // ITEMS_POR_PAGINA
+        
+        col1, col2, col3 = st.columns([2, 3, 2])
+        with col2:
+            pagina_actual = st.number_input(
+                "Página",
+                min_value=1,
+                max_value=max(1, total_paginas),
+                value=1,
+                key="pagina_reservas"
+            )
+        
+        inicio = (pagina_actual - 1) * ITEMS_POR_PAGINA
+        fin = min(inicio + ITEMS_POR_PAGINA, total_reservas)
+        
+        # Información de paginación
+        st.markdown(f"Mostrando reservas {inicio + 1}-{fin} de {total_reservas}")
+        
+        # Mostrar reservas de la página actual
+        for reserva in reservas[inicio:fin]:
             with st.expander(
                 f"📍 {reserva['canchas']['nombre']} - "\
                 f"👤 {reserva['clientes']['nombre']} {reserva['clientes']['apellido']} - "\
@@ -248,7 +270,7 @@ with tab_lista:
                     if reserva['observaciones']:
                         st.write(f"📝 Observaciones: {reserva['observaciones']}")
                     
-                    # Estado actual con color
+                    # Estado actual with color
                     estado_color = {
                         'pendiente': '🟡',
                         'confirmada': '🟢',

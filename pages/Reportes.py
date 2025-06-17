@@ -238,15 +238,6 @@ with tab_clientes:
         with col3:
             st.metric("Tasa de Retención", f"{tasa_retencion:.1f}%")
         
-        # Exportar datos
-        if st.button("📥 Descargar Reporte de Clientes"):
-            df_export = df_filtrado[['fecha', 'nombre_cliente', 'nombre_cancha', 'monto_total']]
-            csv = df_export.to_csv(index=False)
-            st.download_button(
-                label="Confirmar Descarga CSV",
-                data=csv,
-                file_name=f"reporte_clientes_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv"
-            )
+        
     else:
         st.warning("No hay datos disponibles para el análisis de clientes")
