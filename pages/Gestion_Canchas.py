@@ -1,7 +1,7 @@
 import streamlit as st
 from components.database import supabase, registrar_auditoria
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, time
 
 # Verificación de autenticación
 if not st.session_state.get('autenticado', False):
@@ -24,12 +24,16 @@ def obtener_tipos_cancha():
         st.error(f"Error al obtener tipos de cancha: {str(e)}")
         return []
 
-def obtener_canchas():
+def obtener_canchas(busqueda=""):
     """Obtiene la lista de canchas con sus tipos desde la base de datos"""
     try:
-        response = supabase.table('canchas')\
-            .select('*, tipos_cancha(nombre, precio_por_hora)')\
-            .execute()
+        query = supabase.table('canchas')\
+            .select('*, tipos_cancha(nombre, precio_por_hora)')
+            
+        if busqueda:
+            query = query.or_(f"nombre.ilike.%{busqueda}%,ubicacion.ilike.%{busqueda}%")
+            
+        response = query.execute()
         return response.data
     except Exception as e:
         st.error(f"Error al obtener canchas: {str(e)}")
@@ -128,18 +132,103 @@ def eliminar_cancha(id_cancha):
     except Exception as e:
         return False, f"Error al eliminar cancha: {str(e)}"
 
-# Interfaz de usuario
+def crear_horarios_disponibles(id_cancha, dias_seleccionados, hora_inicio, hora_fin):
+    """Crea los horarios disponibles para una cancha"""
+    try:
+        # Crear los horarios para cada día seleccionado
+        for dia in dias_seleccionados:
+            data = {
+                'id_cancha': id_cancha,
+                'dia_semana': dia,
+                'hora_inicio': hora_inicio.isoformat(),
+                'hora_fin': hora_fin.isoformat()
+            }
+            response = supabase.table('horarios_disponibles').insert(data).execute()
+            
+            # Registrar en auditoría
+            registrar_auditoria(
+                st.session_state['usuario']['email'],
+                'horarios_disponibles',
+                'INSERT',
+                f"Se creó horario para la cancha {id_cancha}, día {dia}",
+                None,
+                data
+            )
+        
+        return True, "Horarios creados exitosamente"
+    except Exception as e:
+        return False, f"Error al crear horarios: {str(e)}"
+
+def mostrar_horarios_disponibles(id_cancha):
+    """
+    Muestra los horarios disponibles de una cancha organizados por día.
+    """
+    try:
+        horarios = supabase.table('horarios_disponibles')\
+            .select('*')\
+            .eq('id_cancha', id_cancha)\
+            .execute()
+        
+        if not horarios.data:
+            st.info("No hay horarios disponibles configurados para esta cancha.")
+            return
+
+        dias_semana = {
+            1: 'Lunes',
+            2: 'Martes',
+            3: 'Miércoles',
+            4: 'Jueves',
+            5: 'Viernes',
+            6: 'Sábado',
+            7: 'Domingo'
+        }
+
+        st.write("#### 📅 Horarios Disponibles")
+        
+        # Ordenar horarios por día de la semana
+        horarios_ordenados = sorted(horarios.data, key=lambda x: x['dia_semana'])
+        
+        # Crear columnas para mostrar los horarios
+        cols = st.columns(2)
+        
+        for idx, horario in enumerate(horarios_ordenados):
+            with cols[idx % 2]:
+                dia = dias_semana.get(horario['dia_semana'], 'Día no válido')
+                # Convertir las horas a formato más legible
+                hora_inicio = datetime.strptime(horario['hora_inicio'], '%H:%M:%S').strftime('%H:%M')
+                hora_fin = datetime.strptime(horario['hora_fin'], '%H:%M:%S').strftime('%H:%M')
+                
+                with st.container():
+                    st.markdown(f"**{dia}**")
+                    st.markdown(f"⏰ {hora_inicio} - {hora_fin}")
+                    st.markdown("---")
+
+    except Exception as e:
+        st.error(f"Error al mostrar los horarios: {str(e)}")
+
+# Configuración de la página
+st.set_page_config(
+    page_title="Gestión de Canchas",
+    page_icon="⚽",
+    layout="wide"
+)
+
 st.title("⚽ Gestión de Canchas")
 
-# Tabs para separar listado y creación
-tab1, tab2 = st.tabs(["📋 Listado de Canchas", "➕ Nueva Cancha"])
+# Barra de búsqueda
+busqueda = st.text_input("🔍 Buscar cancha por nombre o ubicación", "")
 
-with tab1:
+# Pestañas
+tab_lista, tab_crear = st.tabs(["Lista de Canchas", "Crear Cancha"])
+
+with tab_lista:
     st.subheader("Canchas Disponibles")
     
     # Obtener y mostrar canchas
-    canchas = obtener_canchas()
-    if canchas:
+    canchas = obtener_canchas(busqueda)
+    if not canchas:
+        st.info("No se encontraron canchas que coincidan con la búsqueda.")
+    else:
         df = pd.DataFrame(canchas)
         
         # Preparar datos para mostrar
@@ -178,12 +267,16 @@ with tab1:
                                 st.rerun()
                             else:
                                 st.error(message)
+                
+                # Mostrar horarios disponibles
+                mostrar_horarios_disponibles(cancha['id'])
 
-with tab2:
+with tab_crear:
     st.subheader("Agregar Nueva Cancha")
     
     # Formulario de creación
     with st.form("nueva_cancha"):
+        st.write("**Información Básica**")
         nombre = st.text_input("Nombre de la Cancha")
         
         # Obtener y mostrar tipos de cancha
@@ -195,13 +288,64 @@ with tab2:
         capacidad = st.number_input("Capacidad Máxima", min_value=1, value=20)
         observaciones = st.text_area("Observaciones", max_chars=200)
         
+        # Horarios de disponibilidad
+        st.write("**Horarios de Disponibilidad**")
+        dias_semana = {
+            1: "Lunes",
+            2: "Martes",
+            3: "Miércoles",
+            4: "Jueves",
+            5: "Viernes",
+            6: "Sábado",
+            7: "Domingo"
+        }
+        dias_seleccionados = []
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.write("Días disponibles:")
+            for dia in range(1, 8):  # 1 a 7
+                if st.checkbox(dias_semana[dia], key=f"dia_{dia}"):
+                    dias_seleccionados.append(dia)
+        
+        with col2:
+            hora_inicio = st.time_input("Hora de apertura", value=time(7, 0))
+            hora_fin = st.time_input("Hora de cierre", value=time(22, 0))
+            
+            if hora_fin <= hora_inicio:
+                st.error("La hora de cierre debe ser posterior a la hora de apertura")
+        
         if st.form_submit_button("Crear Cancha"):
             if not nombre or not tipo_seleccionado or not ubicacion:
                 st.error("Por favor complete todos los campos requeridos")
+            elif not dias_seleccionados:
+                st.error("Debe seleccionar al menos un día de disponibilidad")
+            elif hora_fin <= hora_inicio:
+                st.error("El horario de cierre debe ser posterior al de apertura")
             else:
+                # Crear la cancha
                 success, message = crear_cancha(nombre, tipo_seleccionado, ubicacion, capacidad, observaciones)
+                
                 if success:
-                    st.success(message)
-                    st.rerun()
+                    # Obtener el ID de la cancha creada
+                    cancha = supabase.table('canchas')\
+                        .select('id')\
+                        .eq('nombre', nombre)\
+                        .single()\
+                        .execute()
+                    
+                    # Crear los horarios
+                    success_horarios, message_horarios = crear_horarios_disponibles(
+                        cancha.data['id'],
+                        dias_seleccionados,
+                        hora_inicio,
+                        hora_fin
+                    )
+                    
+                    if success_horarios:
+                        st.success(f"{message}. {message_horarios}")
+                        st.rerun()
+                    else:
+                        st.warning(f"{message}. Sin embargo, hubo un error con los horarios: {message_horarios}")
                 else:
                     st.error(message)

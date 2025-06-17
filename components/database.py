@@ -205,3 +205,39 @@ def obtener_estadisticas_canchas():
     except Exception as e:
         print(f"Error en obtener_estadisticas_canchas: {str(e)}")  # Para debugging
         raise Exception(f'Error al obtener estadísticas de canchas: {str(e)}')
+
+def obtener_horarios_cancha(id_cancha: int):
+    """
+    Obtiene los horarios disponibles de una cancha específica.
+    
+    Args:
+        id_cancha: ID de la cancha
+    
+    Returns:
+        List[Dict] con los horarios disponibles ordenados por día
+    """
+    try:
+        response = supabase.table('horarios_disponibles')\
+            .select('*')\
+            .eq('id_cancha', id_cancha)\
+            .order('dia_semana')\
+            .execute()
+        
+        if not response.data:
+            return []
+            
+        # Validar y formatear los datos
+        for horario in response.data:
+            if not isinstance(horario['dia_semana'], int):
+                horario['dia_semana'] = int(horario['dia_semana'])
+            
+            # Asegurar que las horas estén en formato correcto
+            if not isinstance(horario['hora_inicio'], str):
+                horario['hora_inicio'] = horario['hora_inicio'].strftime('%H:%M:%S')
+            if not isinstance(horario['hora_fin'], str):
+                horario['hora_fin'] = horario['hora_fin'].strftime('%H:%M:%S')
+        
+        return response.data
+    except Exception as e:
+        print(f"Error en obtener_horarios_cancha: {str(e)}")  # Para debugging
+        raise Exception(f'Error al obtener horarios de la cancha: {str(e)}')
